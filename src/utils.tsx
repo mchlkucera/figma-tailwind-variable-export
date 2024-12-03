@@ -7,9 +7,11 @@ export function rgbaToHex({ r, g, b }: ColorValue): string {
    };
    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
 export function isVariableAlias(value: any): value is VariableAlias {
    return value && value.type === "VARIABLE_ALIAS";
 }
+
 export function isColorValue(value: any): value is ColorValue {
    return (
       value &&
@@ -19,14 +21,21 @@ export function isColorValue(value: any): value is ColorValue {
       typeof value.a === "number"
    );
 }
+
 export function getFirstModeKey(valuesByMode: {
    [key: string]: ValueByMode;
 }): string | undefined {
    return Object.keys(valuesByMode)[0];
 }
-export function generateCssVariableName(name: string): string {
+
+export function generateCssColorVariableName(name: string): string {
    return `--color-${name.replace(/\//g, "-")}`;
 }
+
+export function generateCssVariableName(name: string): string {
+   return `--${name.replace(/[\/ ]/g, "-")}`;
+}
+
 export function sortPrimitives(variables: ColorVariable[]): ColorVariable[] {
    return variables.sort((a, b) => {
       const nameComparison = a.name.localeCompare(b.name);
@@ -37,11 +46,12 @@ export function sortPrimitives(variables: ColorVariable[]): ColorVariable[] {
       return numA - numB;
    });
 }
+
 export function sortSemantics(variables: ColorVariable[]): ColorVariable[] {
    return variables.sort((a, b) => a.name.localeCompare(b.name));
 }
-export // Add this helper function to resolve the final value of a variable
-function resolveVariableValue(
+
+export function resolveVariableValue(
    value: ValueByMode,
    variablesById: Map<string, ColorVariable>
 ): ValueByMode | null {

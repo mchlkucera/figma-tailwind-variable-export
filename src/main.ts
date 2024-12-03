@@ -17,6 +17,7 @@ export default function () {
                name: v.name,
                resolvedType: v.resolvedType,
                valuesByMode: v.valuesByMode,
+               scopes: v.scopes,
             })),
       }));
 

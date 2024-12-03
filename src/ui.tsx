@@ -10,15 +10,44 @@ import { useState, useEffect } from "preact/hooks";
 import Editor from "@monaco-editor/react";
 import {
    sortPrimitives,
-   generateCssVariableName,
+   generateCssColorVariableName,
    getFirstModeKey,
    isColorValue,
    rgbaToHex,
    sortSemantics,
    isVariableAlias,
    resolveVariableValue,
+   generateCssVariableName,
 } from "./utils";
 import { ColorCollection, ColorVariable } from "./types";
+
+function generateOtherCssVariables(
+   collection: ColorCollection,
+   variableMap: Map<string, string>
+): string {
+   if (!collection.variables) return "";
+
+   const cssLines = ["  /* Others */"];
+
+   collection.variables.forEach((variable) => {
+      const cssVariableName = generateCssColorVariableName(variable.name);
+      variableMap.set(variable.id, cssVariableName);
+
+      const modeKey = getFirstModeKey(variable.valuesByMode);
+      if (!modeKey) return;
+
+      const value = variable.valuesByMode[modeKey];
+
+      if (isVariableAlias(value)) {
+         const primitiveVarName = variableMap.get(value.id);
+         if (primitiveVarName) {
+            cssLines.push(`  ${cssVariableName}: var(${primitiveVarName});`);
+         }
+      }
+   });
+
+   return cssLines.join("\n");
+}
 
 function generatePrimitiveCssVariables(
    collection: ColorCollection,
@@ -30,6 +59,32 @@ function generatePrimitiveCssVariables(
    const cssLines = ["  /* Primitive Colors */"];
 
    sortedPrimitives.forEach((variable) => {
+      const cssVariableName = generateCssColorVariableName(variable.name);
+      variableMap.set(variable.id, cssVariableName);
+
+      const modeKey = getFirstModeKey(variable.valuesByMode);
+      if (!modeKey) return;
+
+      const value = variable.valuesByMode[modeKey];
+
+      if (isColorValue(value)) {
+         const cssValue = rgbaToHex(value);
+         cssLines.push(`  ${cssVariableName}: ${cssValue};`);
+      }
+   });
+
+   return cssLines.join("\n");
+}
+
+function generateTailwindCssVariables(
+   collection: ColorCollection,
+   variableMap: Map<string, string>
+): string {
+   if (!collection.variables) return "";
+
+   const cssLines = ["  /* Tailwind Variables */"];
+
+   collection.variables.forEach((variable) => {
       const cssVariableName = generateCssVariableName(variable.name);
       variableMap.set(variable.id, cssVariableName);
 
@@ -37,9 +92,10 @@ function generatePrimitiveCssVariables(
       if (!modeKey) return;
 
       const value = variable.valuesByMode[modeKey];
-      if (isColorValue(value)) {
-         const cssValue = rgbaToHex(value);
-         cssLines.push(`  ${cssVariableName}: ${cssValue};`);
+
+      if (typeof value === "number") {
+         const decimals = Number.isInteger(value) ? 0 : 1;
+         cssLines.push(`  ${cssVariableName}: ${value.toFixed(decimals)};`);
       }
    });
 
@@ -53,10 +109,10 @@ function generateSemanticCssVariables(
    if (!collection.variables) return "";
 
    const sortedSemantics = sortSemantics(collection.variables);
-   const cssLines = ["", "  /* Semantic Colors */"];
+   const cssLines = ["  /* Semantic Colors */"];
 
    sortedSemantics.forEach((variable) => {
-      const cssVariableName = generateCssVariableName(variable.name);
+      const cssVariableName = generateCssColorVariableName(variable.name);
       variableMap.set(variable.id, cssVariableName);
 
       const modeKey = getFirstModeKey(variable.valuesByMode);
@@ -84,10 +140,10 @@ function generateComponentCssVariables(
 ): string {
    if (!collection.variables) return "";
 
-   const cssLines = ["", "  /* Component Variables */"];
+   const cssLines = ["  /* Component Variables */"];
 
    collection.variables.forEach((variable) => {
-      const cssVariableName = generateCssVariableName(variable.name);
+      const cssVariableName = generateCssColorVariableName(variable.name);
       variableMap.set(variable.id, cssVariableName);
 
       const modeKey = getFirstModeKey(variable.valuesByMode);
@@ -109,11 +165,17 @@ function generateComponentCssVariables(
    return cssLines.join("\n");
 }
 
+function addNewLine(cssLines: string[]): void {
+   cssLines.push("");
+}
+
 function generateCssVariables(data: ColorCollection[]): string {
    if (!Array.isArray(data) || data.length === 0) return "";
 
    const variableMap = new Map<string, string>();
    const cssLines: string[] = [":root {"];
+
+   addNewLine(cssLines);
 
    const primitiveCollection = data.find((c) => c.name === " 1. Colors");
    if (primitiveCollection) {
@@ -126,6 +188,31 @@ function generateCssVariables(data: ColorCollection[]): string {
       }
    }
 
+   addNewLine(cssLines);
+
+   const tailwindCollection = data.find((c) => c.name === "Tailwind setup");
+   if (tailwindCollection) {
+      const tailwindCss = generateTailwindCssVariables(
+         tailwindCollection,
+         variableMap
+      );
+      if (tailwindCss) {
+         cssLines.push(tailwindCss);
+      }
+   }
+
+   addNewLine(cssLines);
+
+   const otherCollection = data.find((c) => c.name === " 2. Others");
+   if (otherCollection) {
+      const otherCss = generateOtherCssVariables(otherCollection, variableMap);
+      if (otherCss) {
+         cssLines.push(otherCss);
+      }
+   }
+
+   addNewLine(cssLines);
+
    const semanticCollection = data.find((c) => c.name === "Semantic colors");
    if (semanticCollection) {
       const semanticCss = generateSemanticCssVariables(
@@ -137,8 +224,9 @@ function generateCssVariables(data: ColorCollection[]): string {
       }
    }
 
+   addNewLine(cssLines);
+
    const componentCollection = data.find((c) => c.name === " 3. Components");
-   debugger;
    if (componentCollection) {
       const componentCss = generateComponentCssVariables(
          componentCollection,
@@ -170,6 +258,33 @@ function processPrimitives(
          categories[category] = {};
       }
       categories[category][shade] = rgbaToHex(colorValue);
+
+      return categories;
+   }, {} as Record<string, Record<string, string>>);
+}
+
+function processOthers(
+   others: ColorVariable[],
+   variablesById: Map<string, ColorVariable>
+): Record<string, Record<string, string>> {
+   return others.reduce((categories, variable) => {
+      const modeKey = getFirstModeKey(variable.valuesByMode);
+      if (!modeKey) return categories;
+
+      let value = variable.valuesByMode[modeKey];
+
+      if (variable.scopes.includes("CORNER_RADIUS") && isVariableAlias(value)) {
+         const primitiveVarName = variablesById.get(value.id)?.name;
+         categories.borderRadius = {
+            [variable.name]: `var(--${primitiveVarName.replace(/\//g, "-")})`,
+         };
+      } else if (variable.scopes.includes("CORNER_RADIUS")) {
+         categories.borderRadius = {
+            [variable.name]: value,
+         };
+      }
+
+      if (!isColorValue(value)) return categories;
 
       return categories;
    }, {} as Record<string, Record<string, string>>);
@@ -277,6 +392,10 @@ function generateJsMapping(data: ColorCollection[]): string {
    const primitives = primitiveCollection?.variables || [];
    const primitiveCategories = processPrimitives(primitives);
 
+   const otherCollection = data.find((c) => c.name === " 2. Others");
+   const others = otherCollection?.variables || [];
+   const otherCategories = processOthers(others, variablesById);
+
    const semanticCollection = data.find((c) => c.name === "Semantic colors");
    const semantics = semanticCollection?.variables || [];
    const { main, other } = processSemantics(semantics);
@@ -288,6 +407,7 @@ function generateJsMapping(data: ColorCollection[]): string {
    const result = {
       main,
       components: componentCategories,
+      otherCategories,
       other: { ...primitiveCategories, ...other },
    };
 
