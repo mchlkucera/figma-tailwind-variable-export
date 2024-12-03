@@ -57,6 +57,7 @@ function generateSemanticCssVariables(
 
    sortedSemantics.forEach((variable) => {
       const cssVariableName = generateCssVariableName(variable.name);
+      variableMap.set(variable.id, cssVariableName);
 
       const modeKey = getFirstModeKey(variable.valuesByMode);
       if (!modeKey) return;
@@ -137,6 +138,7 @@ function generateCssVariables(data: ColorCollection[]): string {
    }
 
    const componentCollection = data.find((c) => c.name === " 3. Components");
+   debugger;
    if (componentCollection) {
       const componentCss = generateComponentCssVariables(
          componentCollection,
