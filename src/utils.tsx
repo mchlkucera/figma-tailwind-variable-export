@@ -71,3 +71,19 @@ export function resolveVariableValue(
    }
    return currentValue;
 }
+
+export function formatFontFamily(value: string): string {
+   return value.replace(/^["']|["']$/g, ""); // Remove surrounding quotes
+}
+
+export function formatSpacingKey(key: string): string {
+   return key.replace(/(\d+)-(\d+)/, "$1.$2"); // Convert "0-5" to "0.5"
+}
+
+export function cleanVariableName(name: string): string {
+   const [category, ...rest] = name.split("/");
+   return rest
+      .join("-")
+      .replace(/^(size-|family-|weight-|letter-spacing-)/, "")
+      .replace(/\s+/g, "-"); // Replace spaces with hyphens
+}
