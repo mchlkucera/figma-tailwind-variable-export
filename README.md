@@ -49,6 +49,7 @@ $ npm run watch
 
 This will:
 
+
 -  Watch for changes in your TypeScript/CSS files
 -  Rebuild the plugin automatically
 -  Generate TailwindCSS styles
