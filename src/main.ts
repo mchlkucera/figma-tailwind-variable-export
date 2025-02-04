@@ -21,6 +21,8 @@ export default function () {
             })),
       }));
 
+      // do some processing
+
       emit("SET_VARIABLES", result);
    });
 
