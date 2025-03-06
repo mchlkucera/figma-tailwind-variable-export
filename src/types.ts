@@ -1,4 +1,4 @@
-import { ColorVariable } from "./types";
+import { ALLOWED_PREFIXES } from "./constants";
 
 export type ColorValue = {
    r: number;
@@ -37,3 +37,5 @@ export type CssVariable = {
    name: string;
    value: VariableValue;
 }
+
+export type AllowedPrefix = (typeof ALLOWED_PREFIXES)[number];

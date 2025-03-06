@@ -22,9 +22,9 @@ export default function () {
             })),
       }));
 
-      const {generatedTheme,errors} = generateTheme(mappedCollections);
+      const { cssOutput, errors } = generateTheme(mappedCollections);
 
-      emit("SET_VARIABLES", {generatedTheme,errors});
+      emit("SET_VARIABLES", { generatedTheme: cssOutput, errors });
    });
 
    showUI({
