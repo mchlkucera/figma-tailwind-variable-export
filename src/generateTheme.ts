@@ -1,22 +1,23 @@
-import { ColorCollection, ColorVariable, ColorVariableWithValues, VariableMap } from "./types";
+import { ColorCollection,VariableMap } from "./types";
 import {
+    ALLOWED_PREFIXES,
+   AllowedPrefix,
    formatColorValue,
    formatNumberValue,
    formatStringValue,
    generateCssVariableNameWithoutDoubleSlash,
    generateTailwindTheme,
    getFirstModeKey,
+   getFirstWord,
    isColorValue,
    isNumberValue,
    isStringValue,
    isVariableAlias,
-   rgbaToHex,
-   sortVariableMap,
-   sortVariables,
-} from "./utils";
+} from "./helpers";
 
 const createVariableMap = (collections: ColorCollection[]) => {
    const variableMap: VariableMap = new Map();
+   const errors: string[] = [];
 
    for (const collection of collections) {
       for (const variable of collection.variables) {
@@ -24,9 +25,14 @@ const createVariableMap = (collections: ColorCollection[]) => {
          if (!modeKey) continue;
 
          const cssName = generateCssVariableNameWithoutDoubleSlash(variable)
+         const firstWord = getFirstWord(cssName)
+
+         if (!ALLOWED_PREFIXES.includes(firstWord as AllowedPrefix)) {
+            errors.push(`${variable.name} has a prefix that is not allowed: ${firstWord}`)
+            continue;
+         }
 
          let value = variable.valuesByMode[modeKey];
-
          let returnedValue: string | number;
 
          if (isVariableAlias(value)) {
@@ -57,15 +63,15 @@ const createVariableMap = (collections: ColorCollection[]) => {
       }
    }
 
-   return variableMap;
+   return {variableMap,errors};
 };
 
 
 const generateTheme = (collections: ColorCollection[]) => {
-   const variableMap = createVariableMap(collections);
+   const {variableMap,errors} = createVariableMap(collections);
    const generatedTheme = generateTailwindTheme(variableMap);
 
-   return generatedTheme;
+   return {generatedTheme,errors};
 };
 
 export default generateTheme;

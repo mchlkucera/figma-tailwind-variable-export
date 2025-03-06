@@ -79,34 +79,44 @@ export function getFirstModeKey(
    return Object.keys(valuesByMode)[0];
 }
 
-const ALLOWED_PREFIXES = ['text', 'breakpoint', 'spacing', 'radius', 'border', 'font'] as const;
-type AllowedPrefix = typeof ALLOWED_PREFIXES[number];
+export const ALLOWED_PREFIXES = [
+    'text',
+    'breakpoint',
+    'spacing',
+    'radius',
+    'border',
+    'font',
+    'color',
+    'font-weight',
+    'tracking',
+    'leading',
+    'container',
+    'shadow',
+    'inset-shadow',
+    'drop-shadow',
+    'blur',
+    'perspective',
+    'aspect',
+    'ease',
+    'animate'
+] as const;
 
-export function validateVariableName(name: string): { isValid: boolean; prefix: AllowedPrefix | null; error?: string } {
-   const prefix = name.split('/')[0];
-   
-   if (!prefix) {
-      return { isValid: false, prefix: null, error: 'Variable name must have a prefix' };
-   }
-
-   if (!ALLOWED_PREFIXES.includes(prefix as AllowedPrefix)) {
-      return { 
-         isValid: false, 
-         prefix: null, 
-         error: `Invalid prefix "${prefix}". Allowed prefixes are: ${ALLOWED_PREFIXES.join(', ')}` 
-      };
-   }
-
-   return { isValid: true, prefix: prefix as AllowedPrefix };
-}
+export type AllowedPrefix = typeof ALLOWED_PREFIXES[number];
 
 export function generateCssVariableNameWithoutDoubleSlash(variable: ColorVariable): string {
+   const sanitized = variable.name.replace(/[\/ ]/g, "-")
+   const suffix = getSuffix(sanitized)
 
    if (variable.resolvedType === "COLOR") {
-      return `color-${variable.name.replace(/[\/ ]/g, "-")}`;
+      return `color-${sanitized}`;
+   }
+
+   if (ALLOWED_PREFIXES.includes(suffix as AllowedPrefix)) {
+      const withoutSuffix = sanitized.slice(0, -suffix.length || undefined).replace(/-$/, '');
+      return `${suffix}-${withoutSuffix}`;
    }
    
-   return `${variable.name.replace(/[\/ ]/g, "-")}`;
+   return `${sanitized}`;
 }
 
 
@@ -212,6 +222,9 @@ function getSuffix(name: string): string {
    return match ? match[1] : "";
 }
 
+export function getFirstWord(name: string): string {
+   return name.split('-')[0]
+}
 
 
 const generateCssOutput = (cssList: ColorVariableWithValues[]) => {
