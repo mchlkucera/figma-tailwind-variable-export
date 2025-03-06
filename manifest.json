@@ -4,7 +4,7 @@
     "figma"
   ],
   "id": "figma-tailwind-variable-export",
-  "name": "Figma to Tailwind variable export",
+  "name": "Variables to Tailwind theme export",
   "main": "build/main.js",
   "ui": "build/ui.js"
 }

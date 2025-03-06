@@ -1,3 +1,5 @@
+import { ColorVariable } from "./types";
+
 export type ColorValue = {
    r: number;
    g: number;
@@ -16,10 +18,22 @@ export type ColorVariable = {
    name: string;
    resolvedType: string;
    valuesByMode: {
-      [key: string]: ValueByMode;
+      [key: string]: VariableValue;
    };
 };
 export type ColorCollection = {
    name: string;
    variables: ColorVariable[];
 };
+
+export type ColorVariableWithValues = ColorVariable & {
+    value: string | number;
+    cssName: string;
+};
+
+export type VariableMap = Map<string, ColorVariableWithValues>;
+
+export type CssVariable = {
+   name: string;
+   value: VariableValue;
+}

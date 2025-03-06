@@ -1,4 +1,5 @@
 import { once, showUI, on, emit } from "@create-figma-plugin/utilities";
+import generateTheme from "./generateTheme";
 
 export default function () {
    on("GET_VARIABLES", async function () {
@@ -6,7 +7,7 @@ export default function () {
          await figma.variables.getLocalVariableCollectionsAsync();
       const variables = figma.variables.getLocalVariables();
 
-      const result = collections.map((collection) => ({
+      const mappedCollections = collections.map((collection) => ({
          id: collection.id,
          name: collection.name,
          modes: collection.modes,
@@ -21,7 +22,9 @@ export default function () {
             })),
       }));
 
-      emit("SET_VARIABLES", result);
+      const generatedContent = generateTheme(mappedCollections);
+
+      emit("SET_VARIABLES", generatedContent);
    });
 
    showUI({

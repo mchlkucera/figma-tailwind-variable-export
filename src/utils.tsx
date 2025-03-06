@@ -1,4 +1,4 @@
-import { ColorValue, ValueByMode, ColorVariable } from "./types";
+import { ColorValue, ValueByMode, ColorVariable, VariableMap, ColorVariableWithValues, CssVariable } from "./types";
 
 export function rgbaToHex({ r, g, b }: ColorValue): string {
    const toHex = (n: number) => {
@@ -12,9 +12,20 @@ export function isVariableAlias(value: any): value is VariableAlias {
    return value && value.type === "VARIABLE_ALIAS";
 }
 
-export function isColorValue(value: any): value is ColorValue {
+export function isNumberValue(value: any): value is number {
+   return Number.isFinite(Number(value));
+}
+
+function isHexValue(value: any): value is string {
    return (
-      value &&
+      typeof value === "string" &&
+      value.startsWith("#") &&
+      (value.length === 7 || value.length === 4 || value.length === 9)
+   );
+}
+
+function isRgbaValue(value: any): value is ColorValue {
+   return (
       typeof value.r === "number" &&
       typeof value.g === "number" &&
       typeof value.b === "number" &&
@@ -22,54 +33,119 @@ export function isColorValue(value: any): value is ColorValue {
    );
 }
 
-export function getFirstModeKey(valuesByMode: {
-   [key: string]: ValueByMode;
-}): string | undefined {
+export function isColorValue(value: any): value is ColorValue {
+   if (!value) {
+      return false;
+   }
+
+   if (isRgbaValue(value)) {
+      return true;
+   }
+
+   if (isHexValue(value)) {
+      return true;
+   }
+
+   return false;
+}
+
+export function formatColorValue(value: ColorValue): string {
+   if (isRgbaValue(value)) {
+      return rgbaToHex(value);
+   }
+
+   if (isHexValue(value)) {
+      return value;
+   }
+
+   throw new Error(`Unsupported value type: ${typeof value}`);
+}
+
+export function formatStringValue(value: string): string {
+   return `"${value}"`;
+}
+
+export function formatNumberValue(value: number): string {
+   return Number(Number(value).toFixed(1)).toString();
+}
+
+export function isStringValue(value: any): value is string {
+   return typeof value === "string";
+}
+
+export function getFirstModeKey(
+   valuesByMode: ColorVariable["valuesByMode"]
+): string | undefined {
    return Object.keys(valuesByMode)[0];
 }
 
-export function generateCssColorVariableName(name: string): string {
-   return `--color-${name.replace(/\//g, "-")}`;
+const ALLOWED_PREFIXES = ['text', 'breakpoint', 'spacing', 'radius', 'border', 'font'] as const;
+type AllowedPrefix = typeof ALLOWED_PREFIXES[number];
+
+export function validateVariableName(name: string): { isValid: boolean; prefix: AllowedPrefix | null; error?: string } {
+   const prefix = name.split('/')[0];
+   
+   if (!prefix) {
+      return { isValid: false, prefix: null, error: 'Variable name must have a prefix' };
+   }
+
+   if (!ALLOWED_PREFIXES.includes(prefix as AllowedPrefix)) {
+      return { 
+         isValid: false, 
+         prefix: null, 
+         error: `Invalid prefix "${prefix}". Allowed prefixes are: ${ALLOWED_PREFIXES.join(', ')}` 
+      };
+   }
+
+   return { isValid: true, prefix: prefix as AllowedPrefix };
 }
 
-export function generateCssVariableName(name: string): string {
-   return `--${name.replace(/[\/ ]/g, "-")}`;
+export function generateCssVariableNameWithoutDoubleSlash(variable: ColorVariable): string {
+
+   if (variable.resolvedType === "COLOR") {
+      return `color-${variable.name.replace(/[\/ ]/g, "-")}`;
+   }
+   
+   return `${variable.name.replace(/[\/ ]/g, "-")}`;
 }
 
-export function sortPrimitives(variables: ColorVariable[]): ColorVariable[] {
+
+export function sortVariables(variables: ColorVariableWithValues[]): ColorVariableWithValues[] {
    return variables.sort((a, b) => {
-      const nameComparison = a.name.localeCompare(b.name);
-      if (nameComparison !== 0) return nameComparison;
+      const nameA = a.cssName;
+      const nameB = b.cssName;
 
-      const numA = parseInt(a.name.match(/\d+/)?.[0] || "0");
-      const numB = parseInt(b.name.match(/\d+/)?.[0] || "0");
-      return numA - numB;
+      const suffixA = getSuffix(nameA);
+      const suffixB = getSuffix(nameB);
+      
+      const beforeSuffixA = nameA.slice(0, -suffixA.length || undefined).replace(/-$/, '');
+      const beforeSuffixB = nameB.slice(0, -suffixB.length || undefined).replace(/-$/, '');
+
+      const prefixComparison = beforeSuffixA.localeCompare(beforeSuffixB);
+      if (prefixComparison !== 0) {
+         return prefixComparison;
+      }
+
+      const hasSizeSuffixA = SIZE_ORDER.includes(suffixA);
+      const hasSizeSuffixB = SIZE_ORDER.includes(suffixB);
+
+      if (hasSizeSuffixA && hasSizeSuffixB) {
+         return getSizeOrder(suffixA) - getSizeOrder(suffixB);
+      }
+
+      const numA = parseFloat(suffixA);
+      const numB = parseFloat(suffixB);
+      
+      if (!isNaN(numA) && !isNaN(numB)) {
+         return numA - numB;
+      }
+
+      return suffixA.localeCompare(suffixB);
    });
 }
 
 export function sortSemantics(variables: ColorVariable[]): ColorVariable[] {
    return variables.sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export function resolveVariableValue(
-   value: ValueByMode,
-   variablesById: Map<string, ColorVariable>
-): ValueByMode | null {
-   let currentValue = value;
-   const visited = new Set<string>();
-   while (isVariableAlias(currentValue)) {
-      if (visited.has(currentValue.id)) {
-         // Circular reference detected
-         return null;
-      }
-      visited.add(currentValue.id);
-      const variable = variablesById.get(currentValue.id);
-      if (!variable) return null;
-      const modeKey = getFirstModeKey(variable.valuesByMode);
-      if (!modeKey) return null;
-      currentValue = variable.valuesByMode[modeKey];
-   }
-   return currentValue;
 }
 
 export function formatFontFamily(value: string): string {
@@ -87,3 +163,76 @@ export function cleanVariableName(name: string): string {
       .replace(/^(size-|family-|weight-|letter-spacing-)/, "")
       .replace(/\s+/g, "-"); // Replace spaces with hyphens
 }
+
+function getPrefix(name: string): string {
+   return name.match(/^[^0-9-]+|^[^-]+-/)?.[0] || name;
+}
+
+function extractNumber(name: string): number {
+   return parseFloat(name.replace(/[^0-9.]/g, "")) || 0;
+}
+
+function compareByPrefix(nameA: string, nameB: string): number {
+   const prefixA = getPrefix(nameA);
+   const prefixB = getPrefix(nameB);
+   return prefixA.localeCompare(prefixB);
+}
+
+function compareByNumber(nameA: string, nameB: string): number {
+   const numA = extractNumber(nameA);
+   const numB = extractNumber(nameB);
+
+   if (numA === numB) {
+      return nameA.localeCompare(nameB);
+   }
+   return numA - numB;
+}
+
+const SIZE_ORDER = [
+   "xxs",
+   "xs",
+   "sm",
+   "default",
+   "base",
+   "md",
+   "lg",
+   "xl",
+   "2xl",
+   "3xl",
+   "4xl",
+   "5xl",
+];
+
+function getSizeOrder(size: string): number {
+   return SIZE_ORDER.indexOf(size);
+}
+
+function getSuffix(name: string): string {
+   const match = name.match(/-([^-]+)$/);
+   return match ? match[1] : "";
+}
+
+
+
+const generateCssOutput = (cssList: ColorVariableWithValues[]) => {
+   const cssLines: string[] = []
+
+   cssLines.push("@theme {");
+   
+   for (const css of cssList) {
+      cssLines.push(`  --${css.cssName}: ${css.value};`);
+   }
+
+   cssLines.push("}");
+
+   return cssLines.join("\n");
+}
+
+export const generateTailwindTheme = (variables: VariableMap  ) => {
+
+   const variablesArray = Array.from(variables.values());
+   const sortedCssList = sortVariables(variablesArray);
+
+   return generateCssOutput(sortedCssList);
+
+};
