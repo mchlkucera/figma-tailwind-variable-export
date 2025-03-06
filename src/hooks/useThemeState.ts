@@ -6,7 +6,7 @@ export const useThemeState = () => {
       content: "",
       errors: [] as string[],
       showModal: false,
-      ignoreErrors: false
+      ignoreErrors: true
    });
 
    useEffect(() => {

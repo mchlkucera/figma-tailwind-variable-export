@@ -1,5 +1,5 @@
 import { ColorVariable, ColorVariableWithValues } from "../types";
-import { getSuffix } from ".";
+import { getFirstWord, getSuffix } from ".";
 import { AllowedPrefix } from "../types";
 import { ALLOWED_PREFIXES } from "../constants";
 
@@ -23,15 +23,36 @@ export const generateCssVariableNameWithoutDoubleSlash = (
    return `${sanitized}`;
 };
 
+const shouldCompareSecondWord = (compareWord: string, cssName: string) => {
+   return (compareWord === "color" || compareWord === "font") && cssName.split("-").length > 2
+}
+
+const getSecondWord = (compareWord: string, cssName: string) => {
+   return getFirstWord(cssName.slice(compareWord.length + 1));
+}
+
 export const generateCssOutput = (
    cssList: ColorVariableWithValues[]
 ): string => {
    const cssLines: string[] = [];
+   let lastCompareWord: string | undefined = undefined;
 
    cssLines.push("@theme {");
 
    for (const css of cssList) {
+      let compareWord = getFirstWord(css.cssName);
+
+      if (shouldCompareSecondWord(compareWord, css.cssName)) {
+         compareWord = getSecondWord(compareWord, css.cssName);
+      }
+
+      if (compareWord !== lastCompareWord && lastCompareWord !== undefined) {
+         cssLines.push("");
+      }
+
       cssLines.push(`  --${css.cssName}: ${css.value};`);
+
+      lastCompareWord = compareWord;
    }
 
    cssLines.push("}");
@@ -40,5 +61,5 @@ export const generateCssOutput = (
 };
 
 export const createCssVariableNameReference = (variable: string): string => {
-   return `var(--${variable})`
-}
+   return `var(--${variable})`;
+};

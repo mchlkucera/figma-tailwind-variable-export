@@ -1,4 +1,4 @@
-import { getSuffix, undefined, getSizeOrder } from ".";
+import { getSuffix, getSizeOrder } from ".";
 import { ColorVariableWithValues } from "../types";
 import { SIZE_ORDER } from "../constants";
 
