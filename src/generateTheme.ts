@@ -1,4 +1,4 @@
-import { ColorCollection, VariableMap } from "./types";
+import { ColorCollection, VariableMap, TempVariableMap } from "./types";
 import {
    formatColorValue,
    formatNumberValue,
@@ -21,8 +21,12 @@ import { generateCssVariableNameWithoutDoubleSlash } from "./helpers/css";
 import { AllowedPrefix } from "./types";
 import { ALLOWED_PREFIXES } from "./constants";
 
-const createVariableMap = (collections: ColorCollection[]) => {
-   const variableMap: VariableMap = new Map();
+/**
+ * Collects all variables from collections into a temporary map
+ * for later reference resolution
+ */
+const collectAllVariablesValues = (collections: ColorCollection[]) => {
+   const tempMap: TempVariableMap = new Map();
    const errors: string[] = [];
 
    for (const collection of collections) {
@@ -40,37 +44,72 @@ const createVariableMap = (collections: ColorCollection[]) => {
             continue;
          }
 
-         let value = variable.valuesByMode[modeKey];
-         let returnedValue: string | number;
+         const rawValue = variable.valuesByMode[modeKey];
 
-         if (isVariableAlias(value)) {
-            const referencedVariable = variableMap.get(value.id);
-
-            if (!referencedVariable?.value) {
-               continue;
-            }
-
-            returnedValue = createCssVariableNameReference(
-               referencedVariable.cssName
-            );
-         } else if (isNumberValue(value)) {
-            returnedValue = formatNumberValue(value);
-         } else if (isColorValue(value)) {
-            returnedValue = formatColorValue(value);
-         } else if (isStringValue(value)) {
-            returnedValue = formatStringValue(value);
-         } else {
-            throw new Error(`Unsupported value type: ${typeof value}`);
-         }
-
-         variableMap.set(variable.id, {
-            value: returnedValue,
+         tempMap.set(variable.id, {
+            variableValue: rawValue,
             cssName,
             ...variable,
          });
       }
    }
 
+   return { tempMap, errors };
+};
+
+/**
+ * Resolves all variable values, including references to other variables
+ */
+const resolveVariableValues = (tempMap: TempVariableMap) => {
+   const variableMap: VariableMap = new Map();
+   const errors: string[] = [];
+
+   for (const [id, tempVariable] of Array.from(tempMap)) {
+      const variableValue = tempVariable.variableValue;
+      let resolvedValue: string | number;
+
+      if (isVariableAlias(variableValue)) {
+         const referencedVariable = tempMap.get(variableValue.id);
+
+         if (!referencedVariable) {
+            errors.push(
+               `Referenced variable not found for ${tempVariable.name}`
+            );
+            continue;
+         }
+
+         resolvedValue = createCssVariableNameReference(
+            referencedVariable.cssName
+         );
+      } else if (isNumberValue(variableValue)) {
+         resolvedValue = formatNumberValue(variableValue);
+      } else if (isColorValue(variableValue)) {
+         resolvedValue = formatColorValue(variableValue);
+      } else if (isStringValue(variableValue)) {
+         resolvedValue = formatStringValue(variableValue);
+      } else {
+         errors.push(
+            `Unsupported value type for ${
+               tempVariable.name
+            }: ${typeof variableValue}`
+         );
+         continue;
+      }
+
+      variableMap.set(id, {
+         ...tempVariable,
+         resolvedValue: resolvedValue,
+      });
+   }
+
+   return { variableMap, errors };
+};
+
+const createVariableMap = (collections: ColorCollection[]) => {
+   const { tempMap, errors: collectionErrors } = collectAllVariablesValues(collections);
+   const { variableMap, errors: resolutionErrors } = resolveVariableValues(tempMap);
+   const errors = [...collectionErrors, ...resolutionErrors];
+   
    return { variableMap, errors };
 };
 
