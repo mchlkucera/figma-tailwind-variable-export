@@ -22,6 +22,7 @@ export const ALLOWED_PREFIXES = [
 ] as const;
 
 export const SIZE_ORDER = [
+   'none',
    "xxs",
    "xs",
    "sm",
@@ -34,5 +35,6 @@ export const SIZE_ORDER = [
    "3xl",
    "4xl",
    "5xl",
+   'full'
 ];
 

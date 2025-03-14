@@ -1,7 +1,11 @@
-import { getSuffix, getSizeOrder } from ".";
 import { ColorVariableWithValues } from "../types";
 import { SIZE_ORDER } from "../constants";
+import { getSuffix } from "../helpers";
 
+const getSizeOrder = (size: string): number => {
+   const index = SIZE_ORDER.indexOf(size.toLowerCase() as any);
+   return index === -1 ? 999 : index;
+};
 
 export const sortVariables = (variables: ColorVariableWithValues[]): ColorVariableWithValues[] => {
    return variables.sort((a, b) => {
@@ -14,16 +18,15 @@ export const sortVariables = (variables: ColorVariableWithValues[]): ColorVariab
       const beforeSuffixA = nameA.slice(0, -suffixA.length || undefined).replace(/-$/, '');
       const beforeSuffixB = nameB.slice(0, -suffixB.length || undefined).replace(/-$/, '');
 
-      const prefixComparison = beforeSuffixA.localeCompare(beforeSuffixB);
-      if (prefixComparison !== 0) {
-         return prefixComparison;
+      if (beforeSuffixA !== beforeSuffixB) {
+         return beforeSuffixA.localeCompare(beforeSuffixB);
       }
 
-      const hasSizeSuffixA = SIZE_ORDER.includes(suffixA);
-      const hasSizeSuffixB = SIZE_ORDER.includes(suffixB);
+      const sizeOrderA = getSizeOrder(suffixA);
+      const sizeOrderB = getSizeOrder(suffixB);
 
-      if (hasSizeSuffixA && hasSizeSuffixB) {
-         return getSizeOrder(suffixA) - getSizeOrder(suffixB);
+      if (sizeOrderA !== 999 || sizeOrderB !== 999) {
+         return sizeOrderA - sizeOrderB;
       }
 
       const numA = parseFloat(suffixA);

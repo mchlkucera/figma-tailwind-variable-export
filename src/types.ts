@@ -27,11 +27,12 @@ export type ColorCollection = {
 };
 
 export type ColorVariableWithValues = ColorVariable & {
-    value: string | number;
+    resolvedValue: string | number;
     cssName: string;
 };
 
 export type VariableMap = Map<string, ColorVariableWithValues>;
+export type TempVariableMap = Map<string, Omit<ColorVariableWithValues, 'resolvedValue'> & {variableValue: VariableValue}>;
 
 export type CssVariable = {
    name: string;

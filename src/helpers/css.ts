@@ -50,7 +50,7 @@ export const generateCssOutput = (
          cssLines.push("");
       }
 
-      cssLines.push(`  --${css.cssName}: ${css.value};`);
+      cssLines.push(`  --${css.cssName}: ${css.resolvedValue};`);
 
       lastCompareWord = compareWord;
    }
