@@ -7,20 +7,11 @@ import { mockFigmaVariables } from "./figmaVariables.ts";
 const figmaMock = {
    variables: {
       getLocalVariableCollectionsAsync: async () => {
-         console.log("Mock: Getting local variable collections");
-         console.log(
-            "Collections data:",
-            JSON.stringify(mockFigmaVariables.collections, null, 2)
-         );
+         
          return mockFigmaVariables.collections;
       },
       getLocalVariables: () => {
-         console.log("Mock: Getting local variables");
-         console.log(
-            "Variables sample (first item):",
-            JSON.stringify(mockFigmaVariables.variables[0], null, 2)
-         );
-         console.log(`Total variables: ${mockFigmaVariables.variables.length}`);
+         
          return mockFigmaVariables.variables;
       },
    },

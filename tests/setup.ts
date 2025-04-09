@@ -18,12 +18,5 @@ globalThis.showUI = vi.fn();
 beforeAll(() => {
    // Initialize the mock Figma environment
    initFigmaMock();
-
-   // For debugging purposes
-   console.log("Test setup complete: Figma mock initialized");
 });
 
-// Clean up after all tests
-afterAll(() => {
-   console.log("Tests complete");
-});
