@@ -1,7 +1,12 @@
 {
   "extends": "@create-figma-plugin/tsconfig",
   "compilerOptions": {
-    "typeRoots": ["node_modules/@figma", "node_modules/@types"]
+    "typeRoots": ["node_modules/@figma", "node_modules/@types"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ES2020",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test.ts"]
 }

@@ -11,17 +11,28 @@
       "@create-figma-plugin/build": "^3.2.1",
       "@create-figma-plugin/tsconfig": "^3.2.1",
       "@figma/plugin-typings": "1.100.2",
+      "@testing-library/preact": "^3.2.4",
+      "@types/node": "^20.11.16",
+      "@types/react": "^19.1.0",
+      "@vitest/ui": "^3.1.1",
       "concurrently": ">=8",
+      "happy-dom": "^17.4.4",
       "tailwindcss": ">=3",
-      "typescript": ">=4"
+      "ts-node": "^10.9.2",
+      "typescript": ">=4",
+      "vitest": "^3.1.1"
    },
    "scripts": {
       "build": "npm run build:css && npm run build:js",
       "build:css": "tailwindcss --input ./src/input.css --output ./src/output.css",
-      "build:js": "build-figma-plugin --typecheck --minify",
+      "build:js": "build-figma-plugin --minify",
       "watch": "npm run build:css && concurrently npm:watch:css npm:watch:js",
       "watch:css": "tailwindcss --input ./src/input.css --output ./src/output.css --watch",
-      "watch:js": "build-figma-plugin --typecheck --watch"
+      "watch:js": "build-figma-plugin --watch",
+      "test": "vitest run",
+      "test:watch": "vitest",
+      "test:ui": "vitest --ui",
+      "test:legacy": "node --loader ts-node/esm test.ts"
    },
    "figma-plugin": {
       "editorType": [
@@ -31,5 +42,6 @@
       "name": "Figma to Tailwind variable export",
       "main": "src/main.ts",
       "ui": "src/ui.tsx"
-   }
+   },
+   "type": "module"
 }
