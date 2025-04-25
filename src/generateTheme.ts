@@ -1,4 +1,9 @@
-import { ColorCollection, VariableMap, TempVariableMap } from "./types";
+import {
+   ColorCollection,
+   VariableMap,
+   TempVariableMap,
+   GenerateThemeOptions,
+} from "./types";
 import {
    formatColorValue,
    formatNumberValue,
@@ -25,7 +30,10 @@ import { ALLOWED_PREFIXES } from "./constants";
  * Collects all variables from collections into a temporary map
  * for later reference resolution
  */
-const collectAllVariablesValues = (collections: ColorCollection[]) => {
+const collectAllVariablesValues = (
+   collections: ColorCollection[],
+   options: GenerateThemeOptions = {}
+) => {
    const tempMap: TempVariableMap = new Map();
    const errors: string[] = [];
 
@@ -36,6 +44,15 @@ const collectAllVariablesValues = (collections: ColorCollection[]) => {
 
          const cssName = generateCssVariableNameWithoutDoubleSlash(variable);
          const firstWord = getFirstWord(cssName);
+
+         // Skip font family variables if the option is enabled
+         if (
+            options.ignoreFontFamilies &&
+            firstWord === "font" &&
+            (cssName === "font-accent" || cssName === "font-body")
+         ) {
+            continue;
+         }
 
          if (!ALLOWED_PREFIXES.includes(firstWord as AllowedPrefix)) {
             errors.push(
@@ -105,16 +122,26 @@ const resolveVariableValues = (tempMap: TempVariableMap) => {
    return { variableMap, errors };
 };
 
-const createVariableMap = (collections: ColorCollection[]) => {
-   const { tempMap, errors: collectionErrors } = collectAllVariablesValues(collections);
-   const { variableMap, errors: resolutionErrors } = resolveVariableValues(tempMap);
+const createVariableMap = (
+   collections: ColorCollection[],
+   options: GenerateThemeOptions = {}
+) => {
+   const { tempMap, errors: collectionErrors } = collectAllVariablesValues(
+      collections,
+      options
+   );
+   const { variableMap, errors: resolutionErrors } =
+      resolveVariableValues(tempMap);
    const errors = [...collectionErrors, ...resolutionErrors];
-   
+
    return { variableMap, errors };
 };
 
-const generateTheme = (collections: ColorCollection[]) => {
-   const { variableMap, errors } = createVariableMap(collections);
+const generateTheme = (
+   collections: ColorCollection[],
+   options: GenerateThemeOptions = {}
+) => {
+   const { variableMap, errors } = createVariableMap(collections, options);
    const variablesArray = Array.from(variableMap.values());
    const sortedCssList = sortVariables(variablesArray);
    const cssOutput = generateCssOutput(sortedCssList);

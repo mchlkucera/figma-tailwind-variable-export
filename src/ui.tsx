@@ -58,9 +58,18 @@ function Plugin() {
             >
                <Text>Ignore errors</Text>
             </Toggle>
+            <VerticalSpace space="medium" />
+            <Toggle
+               onChange={(e) =>
+                  actions.toggleIgnoreFontFamilies(e.currentTarget.checked)
+               }
+               value={state.ignoreFontFamilies}
+            >
+               <Text>Ignore font families</Text>
+            </Toggle>
          </div>
 
-         <div style={{ display: "flex", height: "560px" }}>
+         <div style={{ display: "flex", height: "530px" }}>
             <Editor
                height="100%"
                defaultLanguage="css"

@@ -6,7 +6,8 @@ export const useThemeState = () => {
       content: "",
       errors: [] as string[],
       showModal: false,
-      ignoreErrors: true
+      ignoreErrors: true,
+      ignoreFontFamilies: false,
    });
 
    useEffect(() => {
@@ -14,11 +15,11 @@ export const useThemeState = () => {
          generatedTheme: string;
          errors: string[];
       }) => {
-         setState(prev => ({
+         setState((prev) => ({
             ...prev,
             content: result.generatedTheme,
             errors: result.errors,
-            showModal: result.errors.length > 0 && !prev.ignoreErrors
+            showModal: result.errors.length > 0 && !prev.ignoreErrors,
          }));
       };
 
@@ -26,10 +27,16 @@ export const useThemeState = () => {
    }, []);
 
    const actions = {
-      generateTheme: () => emit("GET_VARIABLES"),
-      toggleErrors: (checked: boolean) => setState(prev => ({ ...prev, ignoreErrors: checked })),
-      closeModal: () => setState(prev => ({ ...prev, showModal: false }))
+      generateTheme: () =>
+         emit("GET_VARIABLES", {
+            ignoreFontFamilies: state.ignoreFontFamilies,
+         }),
+      toggleErrors: (checked: boolean) =>
+         setState((prev) => ({ ...prev, ignoreErrors: checked })),
+      toggleIgnoreFontFamilies: (checked: boolean) =>
+         setState((prev) => ({ ...prev, ignoreFontFamilies: checked })),
+      closeModal: () => setState((prev) => ({ ...prev, showModal: false })),
    };
 
    return { state, actions };
-}; 
+};
