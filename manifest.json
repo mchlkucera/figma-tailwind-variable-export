@@ -1,6 +1,6 @@
 {
    "api": "1.0.0",
-   "editorType": ["figma"],
+   "editorType": ["figma", "dev"],
    "id": "figma-tailwind-variable-export",
    "name": "Figma to Tailwind variable export",
    "main": "build/main.js",
