@@ -9,7 +9,7 @@ const toHex = (n: number) => {
    return scaled.toString(16).padStart(2, "0");
 };
 
-export const rgbaToHex = ({ r, g, b, a }: ColorValue): string => {
+export const rgbaToHex = ({ r, g, b, a = 1 }: ColorValue): string => {
    // If alpha is 1, return standard hex
    if (a === 1) {
       return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
@@ -34,8 +34,13 @@ export const formatStringValue = (value: string): string => {
    return `"${value}"`;
 };
 
-export const formatNumberValue = (value: number): string => {
-   return `${Number(value.toFixed(1))}px`;
+export const formatNumberValue = (value: number, cssName?: string): string => {
+   const formattedValue = Number(value.toFixed(1));
+   // Don't add px suffix for font-weight variables
+   if (cssName && cssName.startsWith("font-weight")) {
+      return `${formattedValue}`;
+   }
+   return `${formattedValue}px`;
 };
 
 export const isStringValue = (value: any): value is string => {

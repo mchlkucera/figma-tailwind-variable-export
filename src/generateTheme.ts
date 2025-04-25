@@ -101,7 +101,7 @@ const resolveVariableValues = (tempMap: TempVariableMap) => {
             referencedVariable.cssName
          );
       } else if (isNumberValue(variableValue)) {
-         resolvedValue = formatNumberValue(variableValue);
+         resolvedValue = formatNumberValue(variableValue, tempVariable.cssName);
       } else if (isColorValue(variableValue)) {
          resolvedValue = formatColorValue(variableValue);
       } else if (isStringValue(variableValue)) {

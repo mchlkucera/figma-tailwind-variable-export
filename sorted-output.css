@@ -88,15 +88,15 @@
   --font-letter-spacing-wider: 0.8px;
   --font-letter-spacing-widest: 1.6px;
 
-  --font-weight-black: 900px;
-  --font-weight-bold: 700px;
-  --font-weight-extrabold: 800px;
-  --font-weight-extralight: 200px;
-  --font-weight-light: 300px;
-  --font-weight-medium: 500px;
-  --font-weight-normal: 400px;
-  --font-weight-semibold: 600px;
-  --font-weight-thin: 100px;
+  --font-weight-black: 900;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-thin: 100;
 
   --font-family-accent: var(--font-accent);
   --font-family-body: var(--font-body);
