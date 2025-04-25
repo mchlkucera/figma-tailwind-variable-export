@@ -53,6 +53,21 @@ export type CssVariable = {
 
 export type AllowedPrefix = (typeof ALLOWED_PREFIXES)[number];
 
+export interface ExportOptions {
+   font?: boolean;
+   color?: boolean;
+   spacing?: boolean;
+   radius?: boolean;
+   border?: boolean;
+   fontWeight?: boolean;
+   fontSpacing?: boolean;
+   textSize?: boolean;
+   leading?: boolean;
+   breakpoint?: boolean;
+}
+
 export interface GenerateThemeOptions {
    ignoreFontFamilies?: boolean;
+   ignoreDeprecated?: boolean;
+   exportOptions?: ExportOptions;
 }

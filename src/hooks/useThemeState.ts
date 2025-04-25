@@ -6,8 +6,21 @@ export const useThemeState = () => {
       content: "",
       errors: [] as string[],
       showModal: false,
-      ignoreErrors: true,
+      showErrorReport: false,
       ignoreFontFamilies: false,
+      ignoreDeprecated: true,
+      exportOptions: {
+         font: true,
+         color: true,
+         spacing: true,
+         radius: true,
+         border: true,
+         fontWeight: true, // New option
+         fontSpacing: true, // New option
+         textSize: true, // New option
+         leading: true, // New option
+         breakpoint: true, // New option
+      },
    });
 
    useEffect(() => {
@@ -19,7 +32,7 @@ export const useThemeState = () => {
             ...prev,
             content: result.generatedTheme,
             errors: result.errors,
-            showModal: result.errors.length > 0 && !prev.ignoreErrors,
+            showModal: result.errors.length > 0 && prev.showErrorReport,
          }));
       };
 
@@ -30,11 +43,26 @@ export const useThemeState = () => {
       generateTheme: () =>
          emit("GET_VARIABLES", {
             ignoreFontFamilies: state.ignoreFontFamilies,
+            ignoreDeprecated: state.ignoreDeprecated,
+            exportOptions: state.exportOptions,
          }),
-      toggleErrors: (checked: boolean) =>
-         setState((prev) => ({ ...prev, ignoreErrors: checked })),
+      toggleErrorReport: (checked: boolean) =>
+         setState((prev) => ({ ...prev, showErrorReport: checked })),
       toggleIgnoreFontFamilies: (checked: boolean) =>
          setState((prev) => ({ ...prev, ignoreFontFamilies: checked })),
+      toggleIgnoreDeprecated: (checked: boolean) =>
+         setState((prev) => ({ ...prev, ignoreDeprecated: checked })),
+      toggleExportOption: (
+         option: keyof typeof state.exportOptions,
+         checked: boolean
+      ) =>
+         setState((prev) => ({
+            ...prev,
+            exportOptions: {
+               ...prev.exportOptions,
+               [option]: checked,
+            },
+         })),
       closeModal: () => setState((prev) => ({ ...prev, showModal: false })),
    };
 

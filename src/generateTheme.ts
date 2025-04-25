@@ -27,6 +27,50 @@ import { AllowedPrefix } from "./types";
 import { ALLOWED_PREFIXES } from "./constants";
 
 /**
+ * Determines if a variable should be filtered based on the export options
+ */
+const shouldFilterVariable = (
+   cssName: string,
+   firstWord: string,
+   options: GenerateThemeOptions = {}
+) => {
+   // Skip if the option is not enabled in exportOptions
+   if (options.exportOptions) {
+      // Check for font families specifically - these are specific name patterns
+      if (
+         options.ignoreFontFamilies ||
+         (options.exportOptions.font === false &&
+            (cssName === "font-accent" ||
+               cssName === "font-body" ||
+               cssName === "font-test" ||
+               cssName.startsWith("font-family-")))
+      ) {
+         return true;
+      }
+
+      // Filter by category
+      if (
+         (firstWord === "color" && options.exportOptions.color === false) ||
+         (firstWord === "spacing" && options.exportOptions.spacing === false) ||
+         (firstWord === "radius" && options.exportOptions.radius === false) ||
+         (firstWord === "border" && options.exportOptions.border === false) ||
+         (firstWord === "breakpoint" &&
+            options.exportOptions.breakpoint === false) ||
+         (firstWord === "text" && options.exportOptions.textSize === false) ||
+         (firstWord === "leading" && options.exportOptions.leading === false) ||
+         (cssName.startsWith("font-letter-spacing") &&
+            options.exportOptions.fontSpacing === false) ||
+         (cssName.startsWith("font-weight") &&
+            options.exportOptions.fontWeight === false)
+      ) {
+         return true;
+      }
+   }
+
+   return false;
+};
+
+/**
  * Collects all variables from collections into a temporary map
  * for later reference resolution
  */
@@ -45,14 +89,17 @@ const collectAllVariablesValues = (
          const cssName = generateCssVariableNameWithoutDoubleSlash(variable);
          const firstWord = getFirstWord(cssName);
 
-         // Skip font family variables if the option is enabled
+         // Skip variables with DEPRECATED prefix if the option is enabled
          if (
-            options.ignoreFontFamilies &&
-            firstWord === "font" &&
-            (cssName === "font-test" ||
-               cssName === "font-accent" ||
-               cssName === "font-body")
+            options.ignoreDeprecated &&
+            (variable.name.toUpperCase().includes("DEPRECATED") ||
+               variable.name.includes("DEPRECTED")) // Handle possible typo in variable names
          ) {
+            continue;
+         }
+
+         // Check if the variable should be filtered based on export options
+         if (shouldFilterVariable(cssName, firstWord, options)) {
             continue;
          }
 

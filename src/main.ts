@@ -4,7 +4,19 @@ import generateTheme from "./generateTheme";
 export default function () {
    on(
       "GET_VARIABLES",
-      async function (data: { ignoreFontFamilies?: boolean } = {}) {
+      async function (
+         data: {
+            ignoreFontFamilies?: boolean;
+            ignoreDeprecated?: boolean;
+            exportOptions?: {
+               font?: boolean;
+               color?: boolean;
+               spacing?: boolean;
+               radius?: boolean;
+               border?: boolean;
+            };
+         } = {}
+      ) {
          const collections =
             await figma.variables.getLocalVariableCollectionsAsync();
          const variables = figma.variables.getLocalVariables();
@@ -26,6 +38,8 @@ export default function () {
 
          const { cssOutput, errors } = generateTheme(mappedCollections, {
             ignoreFontFamilies: data.ignoreFontFamilies,
+            ignoreDeprecated: data.ignoreDeprecated,
+            exportOptions: data.exportOptions,
          });
 
          emit("SET_VARIABLES", { generatedTheme: cssOutput, errors });
