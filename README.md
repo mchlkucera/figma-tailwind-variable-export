@@ -1,78 +1,125 @@
 # Figma to Tailwind Variable Export
 
-Exports Figma design tokens to CSS custom properties for Tailwind CSS.
+A Figma plugin that exports design tokens (variables) from Figma to CSS custom properties formatted for Tailwind CSS.
 
-## Install & Run
+## Overview
+
+This plugin extracts Figma design variables and converts them into properly formatted CSS custom properties ready to be used with Tailwind CSS. It handles various design token types and provides intelligent sorting and transformation.
+
+## Features
+
+-  Exports multiple variable types:
+   -  Colors
+   -  Typography (font families, weights, sizes, letter spacing)
+   -  Spacing
+   -  Border radius
+   -  Borders
+   -  Breakpoints
+   -  Shadows and effects
+   -  Animations
+-  Real-time preview with Monaco editor
+-  Configurable export options (select which variable types to include)
+-  Smart filtering (e.g., ignore deprecated variables)
+-  Intelligent sorting of variables by category and value
+-  Error validation
+
+## Installation & Development
 
 ```bash
+# Install dependencies
 npm install
+
+# Build the plugin
 npm run build
-```
 
-## Development
-
-```bash
+# Development mode with live reloading
 npm run watch
 ```
 
-## Structure
+## Usage
+
+1. Install the plugin in Figma
+2. Open the plugin panel
+3. Select desired export options
+4. Click "Generate theme" to export variables
+5. Copy the generated CSS output or use it directly in your project
 
 ## Transformation Rules
 
-This plugin provides several transformations to convert Figma variables into properly formatted CSS variables:
+### Color Variables
+
+-  RGB and RGBA values are automatically converted to hex format:
+
+   -  RGB colors → `#RRGGBB` format
+   -  RGBA colors → `#RRGGBBAA` format
+   -  Example: `rgba(255, 0, 0, 0.5)` → `#ff0000aa`
+
+-  Colors are categorized into:
+   -  Base colors (color-base-, color-brand-, color-primary-, etc.)
+   -  Semantic colors (color-text-, color-background-, color-border-, etc.)
+
+### Typography Variables
+
+-  Font weights are exported as numerical values without units:
+
+   -  Example: `font-weight-bold: 700;`
+
+-  Font families are exported as quoted strings:
+
+   -  Example: `font-family-sans: "Inter, sans-serif";`
+
+-  Text sizes and letter spacing include px units:
+   -  Example: `text-lg: 18px;`
+   -  Example: `font-letter-spacing-tight: -0.5px;`
 
 ### Spacing Variables
 
--  Spacing variables with hyphenated decimal values are automatically transformed to use decimal points:
+-  Hyphenated decimal values are automatically transformed:
 
    -  `spacing-0-5` → `spacing-0.5`
    -  `spacing-1-5` → `spacing-1.5`
    -  `spacing-2-5` → `spacing-2.5`
-   -  `spacing-3-5` → `spacing-3.5`
 
--  Spacing variables are sorted in numerical order with special considerations:
-   -  `spacing-0` comes first
-   -  `spacing-px` is positioned between `spacing-0` and `spacing-0.5`
-   -  Decimal values (like `spacing-0.5`) are positioned between their integer neighbors
-   -  The complete sorting order follows Tailwind's default spacing scale:
-      ```
-      spacing-0, spacing-px, spacing-0.5, spacing-1, spacing-1.5, spacing-2,
-      spacing-2.5, spacing-3, spacing-3.5, spacing-4, spacing-5, etc.
-      ```
+-  Special handling for `px` values between 0 and fractional values:
 
-### Sorting Rules
+   -  Example: `spacing-0, spacing-px, spacing-0.5, spacing-1, ...`
 
--  Variables are sorted by prefix type, then by numeric value when applicable
--  Size-based variables are sorted according to predefined size order (xxs, xs, sm, md, lg, xl, etc.)
--  Color variables are categorized into base colors and semantic colors
--  Literal values come before referenced/aliased values
+-  Variables are sorted in numerical order following Tailwind's default spacing scale
 
-## Features
+### Size-based Variables
 
--  🎨 Exports Figma variables to CSS custom properties
--  🔄 Real-time preview with Monaco editor
--  ✨ Supports multiple variable types:
-   -  Colors
-   -  Typography
-   -  Spacing
-   -  Breakpoints
-   -  Borders
-   -  Shadows
-   -  Animations
--  🔍 Error validation
+-  Variables with size suffixes are sorted according to a predefined order:
+   -  `none, xxs, xs, sm, default, base, md, lg, xl, 2xl, 3xl, 4xl, 5xl, full`
+   -  Example: `radius-sm, radius-md, radius-lg`
 
-## Usage
+### Variable References
 
-1. Open the plugin in Figma
-2. Click "Export Variables" to generate:
-   -  CSS custom properties for your color variables
-   -  A JavaScript mapping object for Tailwind configuration
+-  References to other variables are properly formatted as CSS variable references:
+   -  Example: `color-text-primary: var(--color-brand-primary);`
 
-The exported variables are organized into three categories:
+### Output Format
 
--  Primitive Colors: Base color palette
--  Semantic Colors: Purpose-based color assignments
--  Component Variables: Component-specific color variables
+-  Variables are wrapped in a `@theme {}` block:
+
+```css
+@theme {
+   --color-primary: #0080ff;
+   --color-secondary: #5a67d8;
+
+   --spacing-0: 0px;
+   --spacing-1: 4px;
+   --spacing-2: 8px;
+}
+```
+
+### Sorting Logic
+
+-  Variables are grouped by prefix type (color, spacing, text, etc.)
+-  Within each prefix group:
+   -  Size-based variables follow a predefined size order
+   -  Numeric variables are sorted by their numerical value
+   -  Literal values come before referenced/aliased values
+   -  Base colors come before semantic/derived colors
 
 ## Contributing
 
@@ -86,7 +133,7 @@ The exported variables are organized into three categories:
 
 MIT
 
-## See Also
+## Related Resources
 
--  [Create Figma Plugin docs](https://yuanqing.github.io/create-figma-plugin/)
--  [Figma Plugin API docs](https://figma.com/plugin-docs/)
+-  [Figma Plugin API documentation](https://figma.com/plugin-docs/)
+-  [Create Figma Plugin documentation](https://yuanqing.github.io/create-figma-plugin/)
