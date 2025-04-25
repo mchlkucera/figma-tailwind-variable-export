@@ -1,6 +1,6 @@
 import { ColorVariableWithValues } from "../types";
 import { SIZE_ORDER } from "../constants";
-import { getSuffix } from "../helpers";
+import { getSuffix, getSpacingValue } from "../helpers";
 
 // Base colors come before derived semantic colors
 const BASE_COLORS = [
@@ -205,6 +205,13 @@ const sortVariablesByType = (
       const suffixA = getSuffix(nameA);
       const suffixB = getSuffix(nameB);
 
+      // Special handling for spacing variables - sort numerically
+      if (nameA.startsWith("spacing-") && nameB.startsWith("spacing-")) {
+         const valueA = getSpacingValue(nameA);
+         const valueB = getSpacingValue(nameB);
+         return valueA - valueB;
+      }
+
       const detailedPrefixComparison = compareByDetailedPrefix(nameA, nameB);
       if (detailedPrefixComparison !== 0) {
          return detailedPrefixComparison;
@@ -224,6 +231,13 @@ const sortVariablesByType = (
       const nameB = b.cssName;
       const suffixA = getSuffix(nameA);
       const suffixB = getSuffix(nameB);
+
+      // Special handling for spacing variables - sort numerically
+      if (nameA.startsWith("spacing-") && nameB.startsWith("spacing-")) {
+         const valueA = getSpacingValue(nameA);
+         const valueB = getSpacingValue(nameB);
+         return valueA - valueB;
+      }
 
       const detailedPrefixComparison = compareByDetailedPrefix(nameA, nameB);
       if (detailedPrefixComparison !== 0) {

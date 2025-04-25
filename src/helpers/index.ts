@@ -70,6 +70,48 @@ export const getSuffix = (name: string): string => {
    return match ? match[1] : "";
 };
 
+export const transformSpacingValue = (name: string): string => {
+   // Check if it's a spacing variable with a hyphenated decimal pattern (like spacing-0-5)
+   const spacingDecimalRegex = /^spacing-(\d+)-(\d+)$/;
+   const match = name.match(spacingDecimalRegex);
+
+   if (match) {
+      const wholePart = match[1];
+      const decimalPart = match[2];
+      return `spacing-${wholePart}.${decimalPart}`;
+   }
+
+   return name;
+};
+
+// Extract numeric part of spacing variable for sorting
+export const getSpacingValue = (name: string): number => {
+   // First try to extract decimal values (e.g., spacing-0.5)
+   const decimalMatch = name.match(/^spacing-(\d+\.\d+)$/);
+   if (decimalMatch) {
+      return parseFloat(decimalMatch[1]);
+   }
+
+   // Try to extract hyphenated decimal values (e.g., spacing-0-5)
+   const hyphenatedMatch = name.match(/^spacing-(\d+)-(\d+)$/);
+   if (hyphenatedMatch) {
+      return parseFloat(`${hyphenatedMatch[1]}.${hyphenatedMatch[2]}`);
+   }
+
+   // Handle px special case
+   if (name === "spacing-px") {
+      return 0.25; // Place between 0 and 0.5
+   }
+
+   // Handle regular integer values (e.g., spacing-4)
+   const intMatch = name.match(/^spacing-(\d+)$/);
+   if (intMatch) {
+      return parseInt(intMatch[1], 10);
+   }
+
+   return 999; // Default high value for unknown formats
+};
+
 export const getFirstWord = (name: string): string => {
    return name.split("-")[0];
 };
