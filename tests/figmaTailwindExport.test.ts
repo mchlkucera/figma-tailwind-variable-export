@@ -25,7 +25,7 @@ describe("Figma Tailwind Variable Export", () => {
       const { cssOutput } = generateTheme(collections);
 
       // Check if the output matches the current expectation
-      expect(cssOutput).toContain("--radius-none: 0;");
+      expect(cssOutput).toContain("--radius-none: 0px;");
       expect(cssOutput).toContain("--radius-badge: var(--radius-DEFAULT);");
 
       // Verify general structure
@@ -43,7 +43,7 @@ describe("Figma Tailwind Variable Export", () => {
       const radiusSection = extractSection(cssOutput, "radius");
 
       // Find indices of key variables
-      const plainValueIndex = radiusSection.indexOf("--radius-none: 0;");
+      const plainValueIndex = radiusSection.indexOf("--radius-none: 0px;");
       const aliasedValueIndex = radiusSection.indexOf(
          "--radius-badge: var(--radius-DEFAULT);"
       );

@@ -49,7 +49,9 @@ const collectAllVariablesValues = (
          if (
             options.ignoreFontFamilies &&
             firstWord === "font" &&
-            (cssName === "font-accent" || cssName === "font-body")
+            (cssName === "font-test" ||
+               cssName === "font-accent" ||
+               cssName === "font-body")
          ) {
             continue;
          }

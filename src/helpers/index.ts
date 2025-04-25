@@ -35,7 +35,7 @@ export const formatStringValue = (value: string): string => {
 };
 
 export const formatNumberValue = (value: number): string => {
-   return Number(Number(value).toFixed(1)).toString();
+   return `${Number(value.toFixed(1))}px`;
 };
 
 export const isStringValue = (value: any): value is string => {
