@@ -1,7 +1,4 @@
-import {
-   ColorValue,
-   ColorVariable,
-} from "../types";
+import { ColorValue, ColorVariable } from "../types";
 import { SIZE_ORDER } from "../constants";
 import { isRgbaValue, isHexValue } from "./typeGuards";
 
@@ -12,8 +9,13 @@ const toHex = (n: number) => {
    return scaled.toString(16).padStart(2, "0");
 };
 
-export const rgbaToHex = ({ r, g, b }: ColorValue): string => {
-   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+export const rgbaToHex = ({ r, g, b, a }: ColorValue): string => {
+   // If alpha is 1, return standard hex
+   if (a === 1) {
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+   }
+   // Otherwise include alpha channel
+   return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}`;
 };
 
 export const formatColorValue = (value: ColorValue): string => {

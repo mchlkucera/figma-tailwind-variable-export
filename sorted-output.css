@@ -126,7 +126,7 @@
   --container-padding-mobile: var(--spacing-5);
 
   --color-base-black: #25283d;
-  --color-base-transparent: #ffffff;
+  --color-base-transparent: #ffffff00;
   --color-base-white: #ffffff;
 
   --color-brand-50: #d5eefe;
@@ -189,16 +189,16 @@
   --color-secondary-800: #334666;
   --color-secondary-900: #222f44;
 
-  --color-white-alpha-100: #ffffff;
-  --color-white-alpha-200: #ffffff;
-  --color-white-alpha-300: #ffffff;
-  --color-white-alpha-500: #ffffff;
-  --color-white-alpha-700: #ffffff;
-  --color-white-alpha-900: #ffffff;
+  --color-white-alpha-100: #ffffffcc;
+  --color-white-alpha-200: #ffffff7a;
+  --color-white-alpha-300: #ffffff52;
+  --color-white-alpha-500: #ffffff29;
+  --color-white-alpha-700: #ffffff1f;
+  --color-white-alpha-900: #ffffff0a;
 
-  --color-Colors-Effects-Shadows-shadow-lg_01: #0a0d12;
-  --color-Colors-Effects-Shadows-shadow-lg_02: #0a0d12;
-  --color-Colors-Effects-Shadows-shadow-lg_03: #0a0d12;
+  --color-Colors-Effects-Shadows-shadow-lg_01: #0a0d1214;
+  --color-Colors-Effects-Shadows-shadow-lg_02: #0a0d1208;
+  --color-Colors-Effects-Shadows-shadow-lg_03: #0a0d120a;
 
   --color-availability-in-stock: var(--color-text-success);
   --color-availability-out-of-stock: var(--color-text-error);

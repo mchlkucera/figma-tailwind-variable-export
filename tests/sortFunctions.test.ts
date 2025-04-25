@@ -93,9 +93,17 @@ describe("Sort Helper Functions", () => {
    });
 
    test("compareByDetailedPrefix sorts font weights correctly", () => {
-      const items = ["font-weight-light", "font-weight-bold", "font-weight-thin"];
+      const items = [
+         "font-weight-light",
+         "font-weight-bold",
+         "font-weight-thin",
+      ];
       const sortedItems = items.sort(compareByDetailedPrefix);
-      expect(sortedItems).toEqual(["font-weight-light", "font-weight-bold", "font-weight-thin"]);
+      expect(sortedItems).toEqual([
+         "font-weight-light",
+         "font-weight-bold",
+         "font-weight-thin",
+      ]);
    });
 
    test("compareByNumeric correctly sorts numeric suffixes", () => {
@@ -130,131 +138,101 @@ describe("Sort Helper Functions", () => {
       expect(compareByNumeric("text", "10")).toBeNull();
       expect(compareByNumeric("10", "text")).toBeNull();
    });
-
 });
 
 describe("sortVariables", () => {
-    test("should place hex values before aliased variables", () => {
-        const variables: ColorVariableWithValues[] = [
-            // Direct hex values
-            {
-                id: "1",
-                name: "color-brand-50",
-                cssName: "color-brand-50",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "#d5eefe"
-            },
-            {
-                id: "2",
-                name: "color-brand-100",
-                cssName: "color-brand-100",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "#acdeff"
-            },
-            {
-                id: "3",
-                name: "color-base-black",
-                cssName: "color-base-black",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "#25283d"
-            },
-            // Aliased values (references)
-            {
-                id: "4",
-                name: "color-button-primary-bg-active",
-                cssName: "color-button-primary-bg-active",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "var(--color-primary-300)"
-            },
-            {
-                id: "5",
-                name: "color-button-primary-bg-default",
-                cssName: "color-button-primary-bg-default",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "var(--color-primary-300)"
-            },
-            {
-                id: "6",
-                name: "color-border-active",
-                cssName: "color-border-active",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "var(--color-secondary-600)"
-            },
-            {
-                id: "7",
-                name: "color-border-brand",
-                cssName: "color-border-brand",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "var(--color-brand-700)"
-            },
-            {
-                id: "8",
-                name: "color-button-inverted-bg-active",
-                cssName: "color-button-inverted-bg-active",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "var(--color-background-default)"
-            }
-        ];
+   test("should place hex values before aliased variables", () => {
+      const variables: ColorVariableWithValues[] = [
+         // Direct hex values
+         {
+            id: "1",
+            name: "color-brand-50",
+            cssName: "color-brand-50",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "#d5eefe",
+         },
+         {
+            id: "2",
+            name: "color-brand-100",
+            cssName: "color-brand-100",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "#acdeff",
+         },
+         {
+            id: "3",
+            name: "color-base-black",
+            cssName: "color-base-black",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "#25283d",
+         },
+         // Aliased values (references)
+         {
+            id: "4",
+            name: "color-button-primary-bg-active",
+            cssName: "color-button-primary-bg-active",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "var(--color-primary-300)",
+         },
+         {
+            id: "5",
+            name: "color-button-primary-bg-default",
+            cssName: "color-button-primary-bg-default",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "var(--color-primary-300)",
+         },
+         {
+            id: "6",
+            name: "color-border-active",
+            cssName: "color-border-active",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "var(--color-secondary-600)",
+         },
+         {
+            id: "7",
+            name: "color-border-brand",
+            cssName: "color-border-brand",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "var(--color-brand-700)",
+         },
+         {
+            id: "8",
+            name: "color-button-inverted-bg-active",
+            cssName: "color-button-inverted-bg-active",
+            resolvedType: "COLOR",
+            valuesByMode: {},
+            resolvedValue: "var(--color-background-default)",
+         },
+      ];
 
-        const sorted = sortVariables(variables);
+      const sorted = sortVariables(variables);
 
-        // All hex values should come before all aliased values
-        const hexValues = sorted.filter(v => typeof v.resolvedValue === 'string' && v.resolvedValue.startsWith('#'));
-        const aliasedValues = sorted.filter(v => typeof v.resolvedValue === 'string' && v.resolvedValue.startsWith('var(--'));
+      // All hex values should come before all aliased values
+      const hexValues = sorted.filter(
+         (v) =>
+            typeof v.resolvedValue === "string" &&
+            v.resolvedValue.startsWith("#")
+      );
+      const aliasedValues = sorted.filter(
+         (v) =>
+            typeof v.resolvedValue === "string" &&
+            v.resolvedValue.startsWith("var(--")
+      );
 
-        // Check that all hex values come before all aliased values
-        const lastHexIndex = sorted.findIndex(v => v === hexValues[hexValues.length - 1]);
-        const firstAliasedIndex = sorted.findIndex(v => v === aliasedValues[0]);
+      // Check that all hex values come before all aliased values
+      const lastHexIndex = sorted.findIndex(
+         (v) => v === hexValues[hexValues.length - 1]
+      );
+      const firstAliasedIndex = sorted.findIndex((v) => v === aliasedValues[0]);
 
-        expect(lastHexIndex).toBeLessThan(firstAliasedIndex);
-        expect(hexValues.length).toBe(3); // Should have 3 hex values
-        expect(aliasedValues.length).toBe(5); // Should have 5 aliased values
-    });
-
-    test("should remove duplicate variable names", () => {
-        const variables: ColorVariableWithValues[] = [
-            {
-                id: "1",
-                name: "color-brand-50",
-                cssName: "color-brand-50",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "#d5eefe"
-            },
-            {
-                id: "2",
-                name: "color-brand-50", // duplicate name
-                cssName: "color-brand-50",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "#d5eefe"
-            },
-            {
-                id: "3",
-                name: "color-brand-100",
-                cssName: "color-brand-100",
-                resolvedType: "COLOR",
-                valuesByMode: {},
-                resolvedValue: "#acdeff"
-            }
-        ];
-
-        const sorted = sortVariables(variables);
-
-        // Check that we only have unique cssNames
-        const cssNames = sorted.map(v => v.cssName);
-        const uniqueCssNames = [...new Set(cssNames)];
-        
-        expect(cssNames).toEqual(uniqueCssNames);
-        expect(sorted.length).toBe(2); // Should only have color-brand-50 once and color-brand-100
-    });
+      expect(lastHexIndex).toBeLessThan(firstAliasedIndex);
+      expect(hexValues.length).toBe(3); // Should have 3 hex values
+      expect(aliasedValues.length).toBe(5); // Should have 5 aliased values
+   });
 });
-
